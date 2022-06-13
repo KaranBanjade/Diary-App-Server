@@ -83,7 +83,7 @@ router.delete('/my/delete/:id', (req, res) => {
             return res.send("Not Found");
         user.findOneAndUpdate({"_id": uid},
              {$pull:
-                 {
+                {
                 diaries: _id
                 }
             }
