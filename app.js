@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const verifyUser = require("./src/middleware/verify")
+const router = express.Router();
 //Creating an HTTP server
 const app = express();
 

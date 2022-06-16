@@ -3,21 +3,52 @@ const user = require("../models/user.js");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const createToken = require("../middleware/createToken")
-
+const createToken = require("../middleware/createToken");
+const axios =  require('axios');
+router.get('/', (req, res) => {
+    console.log("heelo")
+    let obj = {
+        email: "karan.banja@gmail.com",
+        Topic: "Karan",
+        id: "62aaeda43f889bc193dc4b10",
+    }
+  var data = {
+        service_id: 'DiaryMailer',
+        template_id: 'AccountActive',
+        user_id: 'yu1zAc_6D0itni0wd',
+        template_params: {
+            "user_id": 'yu1zAc_6D0itni0wd',
+            'email': "karan.banja@gmail.com",
+            'Topic': "Karan",
+            'id': "62aaeda43f889bc193dc4b10",
+        }
+    };     
+    axios({
+        method: 'POST',
+        url: 'https://api.emailjs.com/api/v1.0/email/send', 
+        data: JSON.stringify(data),
+    }).then((data)=> {
+        // alert('Your mail is sent!');
+        console.log(data);
+        res.send("Sent")
+    }).catch((error) => {
+        console.log(error);
+        res.send("Not Sent")
+    });
+});
 // TO VERIFY USER USING MAIL SERVICE.
 // USER SHOULD CLICK ON LINK TO HIT THE API THEN THE USER WILL BE AUTHENTICATED TO SIGN IN
 router.get("/verify/:id", async(req,res) => {
     const _id = req.params.id;
     const userData = await user.updateOne({_id},{isActive:true}).exec();
     if(userData == null)
-        return res.send("Invalid Authentication Found!!");
+        return res.status(404).send("Invalid Authentication Found!!");
     if(userData.modifiedCount==0)
-        return res.send("Authentication Already Done.")
+        return res.status(204).send("Authentication Already Done.")
 
     console.log(_id, "User Authentication Successful");
 
-    res.send("User Authentication Successful");
+    res.status(200).send("User Authentication Successful");
 })
 
 router.post("/login",async(req,res)=>{
@@ -27,29 +58,31 @@ router.post("/login",async(req,res)=>{
         {email},
         {username}
     ]}).exec()
-    // CONVERTING MONGOOSE OBJECT TO JSON
     
     if(userData == null)
-        return res.send("User Not Found");
+        return res.status(404).send("User Not Found");
     if(userData.isActive == false)
-        return res.send("ID not activated. Please Check Mail");
-    
+        return res.status(401).send("ID not activated. Please Check Mail");
+
     userData = userData.toJSON();
-    bcrypt.compare(password,userData.password, (err,result)=>{
-        if(err){
-            return res.send("Wrong Password");
-        }
-        if(result){
+    bcrypt.compare(password,userData.password)
+    .then((bool)=>{
+        if(bool === true){
             console.log("Logged in");
             const token = createToken(userData);
             const obj = {...userData, token};
-            return res.send(obj);
+            return res.status(200).send(obj);
         }
+        else
+            return res.status(401).send("Wrong Password");
     })
-
+    .catch((err)=>{
+        return res.status(500).send("Something Went Wrong With HashCheck");
+    })
 })
 
 router.post("/signup", (req,res)=>{
+    console.log(req.body);
     let {email, username, password, name} = {...req.body};
     // Checking if username OR email is taken
     user.findOne({ $or:[
@@ -57,9 +90,9 @@ router.post("/signup", (req,res)=>{
         {username}
     ]})
     .exec((err, data)=>{
-        if(data.username == username) 
+        if(data && data.username == username) 
             return res.send("Username Taken");
-        if(data.email == email)
+        if(data && data.email == email)
             return res.send("Email Taken");
     });
     
@@ -67,9 +100,10 @@ router.post("/signup", (req,res)=>{
     bcrypt.hash(password, 5)
     .then(async(hash)=>{
         await user.create({email,username,password:hash,name})
-        .then(()=>{
+        .then((userData)=>{
             console.log("user created");
-            res.send("Created");
+            let resp = sendMail(userData.email, userData._id);
+            res.send(resp);
         })
         .catch((err) => {
             console.log(err);

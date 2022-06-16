@@ -21,6 +21,11 @@ const diarySchema = new mongoose.Schema({
          type: Date, 
          required: true, 
          default: Date.now 
+    },
+    updated_at: {
+        type:Date,
+        required: true, 
+        default: Date.now
     }
 });
 let diary;
