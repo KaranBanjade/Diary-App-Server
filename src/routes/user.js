@@ -28,7 +28,6 @@ router.get('/', (req, res) => {
         url: 'https://api.emailjs.com/api/v1.0/email/send', 
         data: JSON.stringify(data),
     }).then((data)=> {
-        // alert('Your mail is sent!');
         console.log(data);
         res.send("Sent")
     }).catch((error) => {
@@ -91,9 +90,9 @@ router.post("/signup", (req,res)=>{
     ]})
     .exec((err, data)=>{
         if(data && data.username == username) 
-            return res.send("Username Taken");
+            return res.status(409).send("Username Taken");
         if(data && data.email == email)
-            return res.send("Email Taken");
+            return res.status(409).send("Email Taken");
     });
     
     // Hashing password and creating new account
@@ -103,16 +102,16 @@ router.post("/signup", (req,res)=>{
         .then((userData)=>{
             console.log("user created");
             let resp = sendMail(userData.email, userData._id);
-            res.send(resp);
+            res.status(201).send(resp);
         })
         .catch((err) => {
             console.log(err);
-            res.send("not Created");
+            res.status(500).send("Internal Server Error");
         });
     })
     .catch(err=>{
         console.log(err);
-        res.send("Problem hashing password");
+        res.status(500).send("Problem hashing password");
     });
 })
 
