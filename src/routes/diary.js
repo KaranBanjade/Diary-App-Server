@@ -68,6 +68,7 @@ router.patch('/my/update/:id', (req, res) => {
     diary.updateOne({_id, uid}, {...data}).then((data) => {
         if(data.modifiedCount == 0)
             return res.send("No Updates found");
+        console.log(data);
         return res.send("Updated");
     })
 })

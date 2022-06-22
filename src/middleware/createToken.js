@@ -12,7 +12,7 @@ const createToken = (userData) => {
         },
         key,
         {
-            expiresIn:"1h"
+            expiresIn:"24h"
         }
     );
     return ("Bearer " + token);

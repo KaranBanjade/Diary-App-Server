@@ -5,35 +5,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const createToken = require("../middleware/createToken");
 const axios =  require('axios');
-router.get('/', (req, res) => {
-    console.log("heelo")
-    let obj = {
-        email: "karan.banja@gmail.com",
-        Topic: "Karan",
-        id: "62aaeda43f889bc193dc4b10",
-    }
-  var data = {
-        service_id: 'DiaryMailer',
-        template_id: 'AccountActive',
-        user_id: 'yu1zAc_6D0itni0wd',
-        template_params: {
-            "user_id": 'yu1zAc_6D0itni0wd',
-            'email': "karan.banja@gmail.com",
-            'Topic': "Karan",
-            'id': "62aaeda43f889bc193dc4b10",
-        }
-    };     
-    axios({
-        method: 'POST',
-        url: 'https://api.emailjs.com/api/v1.0/email/send', 
-        data: JSON.stringify(data),
-    }).then((data)=> {
-        console.log(data);
-        res.send("Sent")
-    }).catch((error) => {
-        console.log(error);
-        res.send("Not Sent")
-    });
+const nodemailer = require("nodemailer");
+const {google} = require("googleapis")
+router.get('/', async(req, res) => {
+        res.send("Hellow");
+    
 });
 // TO VERIFY USER USING MAIL SERVICE.
 // USER SHOULD CLICK ON LINK TO HIT THE API THEN THE USER WILL BE AUTHENTICATED TO SIGN IN
@@ -101,8 +77,8 @@ router.post("/signup", (req,res)=>{
         await user.create({email,username,password:hash,name})
         .then((userData)=>{
             console.log("user created");
-            let resp = sendMail(userData.email, userData._id);
-            res.status(201).send(resp);
+            // let resp = sendMail(userData.email, userData._id);
+            res.status(201).send("User Created");
         })
         .catch((err) => {
             console.log(err);
