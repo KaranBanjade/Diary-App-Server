@@ -8,9 +8,45 @@ const axios =  require('axios');
 const nodemailer = require("nodemailer");
 const {google} = require("googleapis")
 router.get('/', async(req, res) => {
-        res.send("Hellow");
-    
-});
+
+    const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
+    oAuth2Client.setCredentials({refresh_token: REFRESH_TOKEN })
+    const mailOptions = {
+                from: "facpro.team@gmail.com",
+                to: "karan.banjade@gmail.com",
+                subject: "Thankyou for your contribution",
+                text:"Hi"
+            }
+    try{
+        const ACCESS_TOKEN = await oAuth2Client.getAccessToken()
+        const transport = nodemailer.createTransport({
+            service: 'gmail',
+            port: 587,
+            auth: {
+                type: 'OAuth2',
+                user: "facpro.team@gmail.com",
+                clientId: CLIENT_ID,
+                clientSecret : CLIENT_SECRET,
+                refreshToken: REFRESH_TOKEN,
+                accessToken : ACCESS_TOKEN
+            },
+            tls: {
+                rejectUnauthorized: false
+            }
+        })
+        const result = await transport.sendMail(mailOptions);
+        console.log(result);
+    }
+    catch(error){
+        console.log(error);
+    }
+    return {
+        "statusCode": 200,
+        "body": JSON.stringify({
+            "message" : "hey"
+        })
+    };
+    })
 // TO VERIFY USER USING MAIL SERVICE.
 // USER SHOULD CLICK ON LINK TO HIT THE API THEN THE USER WILL BE AUTHENTICATED TO SIGN IN
 router.get("/verify/:id", async(req,res) => {
