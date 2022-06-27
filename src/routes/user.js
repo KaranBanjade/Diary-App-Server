@@ -13,7 +13,7 @@ router.get('/', async(req, res) => {
     oAuth2Client.setCredentials({refresh_token: REFRESH_TOKEN })
     const mailOptions = {
                 from: "",
-                to: "karan.banjade@gmail.com",
+                to: "@gmail.com",
                 subject: "Thankyou for your contribution",
                 text:"Hi"
             }
