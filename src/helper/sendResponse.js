@@ -4,6 +4,7 @@ const Response = (code, message, data) => {
         message,
         data
     }
+    // console.log(respObject);
     return respObject;
 };
 
