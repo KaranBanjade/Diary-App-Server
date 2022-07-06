@@ -93,20 +93,24 @@ router.post("/login",async(req,res)=>{
 })
 
 router.post("/signup", (req,res)=>{
-    console.log(req.body);
+    // console.log(req.body);
     let {email, username, password, name} = {...req.body};
     // Checking if username OR email is taken
     user.findOne({ $or:[
         {email},
         {username}
     ]})
-    .exec((err, data)=>{
-        if(data && data.username == username) 
-            return res.status(409).send("Username Taken");
+    .then((data)=>{
+        if(data && data.username == username) {
+            console.log("Username Already Taken");
+            return res.status(409).send("Username Taken");}
         if(data && data.email == email)
             return res.status(409).send("Email Taken");
+    })
+    .catch((err)=>{
+        return res.status(500).send("Something Went Wrong");
     });
-    
+    console.log("ovelflow");
     // Hashing password and creating new account
     bcrypt.hash(password, 5)
     .then(async(hash)=>{
@@ -114,6 +118,19 @@ router.post("/signup", (req,res)=>{
         .then((userData)=>{
             console.log("user created");
             // let resp = sendMail(userData.email, userData._id);
+            const mailOptions = {
+                    "from": "'Diary' <d@gmail.com>",
+                    "to": userData.email,
+                    "subject": "Account Activation",
+                    "text": `Hi ${userData.name},\n\nPlease click on the following link to activate your account: \nhttp://localhost:3000/verify/${userData._id}`
+               
+            }
+            const resp = axios.post("https://scintillating-daffodil-156dbb.netlify.app/.netlify/functions/helloworld", {mailOptions : mailOptions}).then(() => {
+                console.log("mailsend")
+            })
+            .catch((err)=>{
+                console.log(err);
+            })
             res.status(201).send("User Created");
         })
         .catch((err) => {
