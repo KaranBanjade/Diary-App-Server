@@ -25,6 +25,7 @@ router.get('/', async (req, res) => {
 // TO VERIFY USER USING MAIL SERVICE.
 // USER SHOULD CLICK ON LINK TO HIT THE API THEN THE USER WILL BE AUTHENTICATED TO SIGN IN
 router.get("/verify/:id", async (req, res) => {
+    // http://localhost:5000/user/verify/62c7ee4baa5979537ae904b0
     const _id = req.params.id;
     const userData = await user.updateOne({ _id }, { isActive: true }).exec();
     if (userData == null)

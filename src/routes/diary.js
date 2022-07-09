@@ -11,13 +11,16 @@ router.get('/', (req, res) => {
 // Get all diary Of users
 router.get("/my/all", (req, res) => {
     const uid = (req.context?req.context.user.userID:null);
-    uid && user.findOne({uid})
+    uid && user.findById(uid)
     .then((user)=>{
         if(user==null){
             return res.send(Response(401, "Invalid Login! Please Login Again", err));
         }
         diary.find().where('_id').in(user.diaries)
         .then((diaries)=>{
+            if(diaries.length==0){
+                return res.send(Response(200, "No Diaries Found", diaries));
+            }
             return res.send(Response(200, "Success", diaries));
         })
         .catch((err)=>{
@@ -33,7 +36,7 @@ router.get("/my/all", (req, res) => {
 router.get('/my/:id',async(req,res) => {
     const uid = (req.context?req.context.user.userID:null);
     const _id = req.params.id;
-    uid && diary.findOne({uid,_id})
+    uid && diary.findById(uid,_id)
     .then(diaryData => {
         if(diaryData == null) 
             return res.send(Response(404,"No Entry Found", null));
